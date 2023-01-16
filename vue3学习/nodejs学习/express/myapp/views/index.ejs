@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script src='/javascripts/axios.js'></script>
+  </head>
+  <body>
+    <div>
+      账号：
+      <input type="text" id="username">
+    </div>
+    <div>
+      密码：
+      <input type="password" id="password">
+    </div>
+    <div>
+      年龄：
+      <input type="number" id="age">
+    </div>
+    <button id="signBtn">注册</button>
+    <table border="1">
+      <thead>
+        <tr>
+          <td>id</td>
+          <td>name</td>
+          <td>age</td>
+          <td>update</td>
+          <td>delete</td>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script>
+      const username=document.querySelector('#username')
+      const password=document.querySelector('#password')
+      const age=document.querySelector('#age')
+      const signBtn=document.querySelector('#signBtn')
+      const tbody=document.querySelector("tbody")
+      function update(value){
+        axios.post(`/api/user/update/${value}`,{
+            password:'我更新了密码'
+        }).then(res=>{
+          if(res&&res.code===200){
+            location.reload()
+            alert(res.msg)
+          }else{
+            location.href="/login"
+          }
+        })
+      }
+      function deleteInfo(value){
+        axios.get(`/api/user/delete/${value}`).then(res=>{
+          if(res&&res.code===200){
+            location.reload()
+            alert(res.msg)
+          }else{
+            location.href="/login"
+          }
+        })
+      }
+      signBtn.onclick=()=>{
+        axios.post("/api/user/add",{
+            username:username.value,
+            password:password.value,
+            age:age.value
+        }).then(res=>{
+          if(res&&res.code===200){
+            location.reload()
+            alert(res.msg)
+          }else{
+            location.href="/login"
+          }
+        })
+      }
+      axios.get("/api/user/getInfo").then(res=>{
+        const filed=res.map(item=>{
+          const updateBtn=`<button onclick=update(${"\'"+item._id+"\'"})>更新</button>`
+          const deleteBtn=`<button onclick=deleteInfo(${"\'"+item._id+"\'"})>删除</button>`
+          
+          return `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.username}</td>
+            <td>${item.age}</td>
+            <td>${updateBtn}</td>
+            <td>${deleteBtn}</td>
+            </tr>`
+        })
+        tbody.innerHTML=filed.join("")
+      })
+    </script>
+  </body>
+</html>
